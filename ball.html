@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<meta charset=utf-8 />
+<title>JavaScript Bin</title>
+<!--[if IE]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<style>
+  .circle{
+    display: block;
+    position:absolute;
+    background:red;
+    padding:0px;
+    margin:0px;
+  }
+  #ground { margin:0 auto; 
+    height:500px;
+    width:500px;
+    position:relative;
+    padding:0;
+    border:1px solid;
+  }
+</style>
+</head>
+<body bgcolor="#CCCCCC" >
+  
+  <div id="ground">
+  </div>
+<script>
+//generate a random number within a range
+function randomXToY(minVal,maxVal,floatVal)
+{
+  var randVal = minVal+(Math.random()*(maxVal-minVal));
+  return typeof floatVal=='undefined'?Math.round(randVal):randVal.toFixed(floatVal);
+}
+
+// The Ball class
+Ball = (function() {
+  
+  // constructor
+  function Ball(x,y,radius,color){
+    this.center = {x:x, y:y};  
+    this.radius = radius;               
+    this.color = color;
+    this.dx = 2;               
+    this.dy = 2;        
+    this.boundaryHeight = $('#ground').height();
+    this.boundaryWidth = $('#ground').width();
+
+    this.dom  = $('<p class="circle"></p>').appendTo('#ground');
+    
+    // the rectange div a circle
+    this.dom.width(radius*2);
+    this.dom.height(radius*2);
+    this.dom.css({'border-radius':radius,background:color});
+         
+    this.placeAtCenter(x,y);         
+  }
+  
+  // Place the ball at center x, y
+  Ball.prototype.placeAtCenter = function(x,y){
+    this.dom.css({top: Math.round(y- this.radius), left: Math.round(x - this.radius)});
+    this.center.x = Math.round(x);        
+    this.center.y = Math.round(y);             
+  };
+
+  Ball.prototype.setColor = function(color) {
+    if(color) {
+      this.dom.css('background',color);
+    } else {
+      this.dom.css('background',this.color);
+    }           
+  };
+
+  // move and bounce the ball
+  Ball.prototype.move = function(){
+    var diameter = this.radius * 2;                                               
+    var radius = this.radius;  
+    if (this.center.x - radius < 0 || this.center.x + radius > this.boundaryWidth ) {
+      this.dx = -this.dx;
+    }
+    if (this.center.y - radius < 0 || this.center.y  + radius > this.boundaryHeight ) {
+      this.dy = -this.dy;
+    }
+    this.placeAtCenter(this.center.x + this.dx ,this.center.y +this.dy);
+
+  };
+  
+  
+  
+  return Ball;
+})();
+
+var number_of_balls = 5;
+var  balls = [];   
+               
+$('document').ready(function(){
+  for (i = 0; i < number_of_balls; i++) { 
+    var boundaryHeight = $('#ground').height();
+    var boundaryWidth = $('#ground').width();
+    var y = randomXToY(30,boundaryHeight - 50);
+    var x = randomXToY(30,boundaryWidth - 50);
+    var radius = randomXToY(15,30);
+    balls.push(new Ball(x,y,radius, '#'+Math.floor(Math.random()*16777215).toString(16))); 
+  }
+  loop(); 
+  check();          
+});
+
+    loop = function(){
+      for (var i = 0; i < balls.length; i++){
+        balls[i].move();
+      }
+      
+      setTimeout(loop, 1); 
+    };
+
+//Calculate the Eucledian distance between the centers of each ball.
+check = function(){
+  for(var j = 0; j < balls.length; j++){
+    for(var i=0;i<balls.length;i++){
+        
+    if (i!=j) 
+    {
+        if (Math.pow(balls[j].center.x - balls[i].center.x, 2) + Math.pow(balls[j].center.y - balls[i].center.y, 2) <= Math.pow(balls[i].radius + balls[j].radius, 2)) 
+        {
+        console.log(true);
+        balls[j].setColor('#ff0000');
+        }else 
+        {
+        balls[j].setColor(balls[j].color);
+        } 
+    }
+   
+ }}
+   setTimeout(check, 1);  
+};
+
+</script>
+</body>
+</html>
